@@ -1,0 +1,28 @@
+name: react app
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4.1.2
+      - name: docker login
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }}   -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: build image
+        run: docker build -t saqeebahmed/react-app-cicd . --build-arg REACT_APP_NODE_ENV='production' --build-arg REACT_APP_SERVER_BASE_URL='${{secrets.REACT_APP_SERVER_BASE_URL}}'
+      - name: push image
+        run: docker push  saqeebahmed/react-app-cicd:latest
+
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: pull image
+        run: docker pull saqeebahmed/react-app-cicd:latest
+      - name: remove container
+        run: docker rm -f react-app-conatiner
+      - name: run container
+        run: docker run -d -p 3000:80 --name react-app-conatiner saqeebahmed/react-app-cicd
