@@ -1,4 +1,4 @@
-FROM node:alpine3.20
+FROM node:alpine3.20 as build
 
 ARG REACT_APP_SERVER_BASE_URL
 ARG REACT_APP_NODE_ENV
@@ -13,7 +13,7 @@ RUN npm run build
 
 FROM nginx:1.23-alpine
 WORKDIR /usr/share/nginx/html
-RUN rm -rf *
+RUN rm -f *
 COPY --from=build /app/build .
 EXPOSE 80
 ENTRYPOINT [ "nginx","-g","daemon off;" ]
